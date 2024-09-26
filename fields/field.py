@@ -3,12 +3,14 @@
 import numpy as np
 from fields.utils import external_input_function, kernel_osc
 
+
 class Field:
-    def __init__(self, kernel_pars, field_pars, external_input_pars_list, tau_h=100, h_0=0, input_flag=True, name="Field"):
+    def __init__(self, kernel_pars, field_pars, external_input_pars_list, tau_h=100, h_0=0, input_flag=True, name="Field", field_type=None):
         self.kernel_pars = kernel_pars
         self.field_pars = field_pars
-        self.external_input_pars_list = external_input_pars_list  # Correctly store the input parameters
+        self.external_input_pars_list = external_input_pars_list
         self.name = name
+        self.field_type = field_type  # New attribute for field type
         self.x_lim, self.t_lim, self.dx, self.dt, self.theta = field_pars
         self.tau_h = tau_h
         self.h_0 = h_0
@@ -20,11 +22,9 @@ class Field:
 
         # State history and current state initialization
         self.history_u = np.zeros([len(self.t), len(self.x)])
+        self.activity = np.zeros([len(self.t), len(self.x)])  # Initialize activity array
         self.u_field = h_0 * np.ones(np.shape(self.x))
         self.h_u = h_0 * np.ones(np.shape(self.x))
-
-        # Activity tracking
-        self.activity = np.zeros((len(self.t), len(self.x)))  # Initialize activity array
 
         # Fourier transform of the kernel function
         self.w_hat = np.fft.fft(kernel_osc(self.x, *self.kernel_pars))
@@ -34,13 +34,21 @@ class Field:
 
     def integrate_single_step(self, i):
         external_input = self.get_external_input(self.t[i])
-        internal_input = self.get_internal_input(i)  # Assume this function exists
+        internal_input = self.get_internal_input(i)
 
         f = np.heaviside(self.u_field - self.theta, 1)
         f_hat = np.fft.fft(f)
         conv = self.dx * np.fft.ifftshift(np.real(np.fft.ifft(f_hat * self.w_hat)))
 
-        self.h_u += self.dt / self.tau_h * f
+        # Calculate h_u based on field type
+        if self.field_type == "sequence_memory":
+            self.h_u += self.dt / self.tau_h * f
+        elif self.field_type == "decision":
+            self.h_u += self.dt / self.tau_h
+        else:
+            # If the type is not provided, keep h_u constant
+            self.h_u = self.h_u  # No change to h_u
+
         self.u_field += self.dt * (-self.u_field + conv + external_input + internal_input + self.h_u)
 
         self.history_u[i, :] = self.u_field

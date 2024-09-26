@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # Define external input parameters for sequence_memory
     external_input_pars1 = [
         (0.0, 1.5, 10, 15),  # Input 1 parameters: center, width, active_start, active_end
-        (30.0, 1.0, 20, 25)  # Input 2 parameters
+        (30.0, 1.0, 40, 45)  # Input 2 parameters
     ]
 
     # Define external input parameters for field2
@@ -20,14 +20,14 @@ if __name__ == "__main__":
     ]
 
     # Create fields
-    sequence_memory = Field(kernel_pars, field_pars, external_input_pars1, name="Sequence Memory")
+    sequence_memory = Field(kernel_pars, field_pars, external_input_pars1, field_type="sequence_memory")
     field2 = Field(kernel_pars, field_pars, external_input_pars2, name="Field2")
 
     # Add connection (example)
     sequence_memory.add_connection(field2, weight=0.5)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "recall"  # Change this to "recall" for the other mode
+    mode = "learning"  # Change this to "recall" for the other mode
     if mode == "learning":
         simultaneous_integration([sequence_memory])
 
