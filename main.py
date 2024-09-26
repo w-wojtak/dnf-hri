@@ -2,7 +2,7 @@
 
 from fields.field import Field
 from fields.plotter import Plotter
-from fields.utils import simultaneous_integration, save_final_state
+from fields.utils import simultaneous_integration, save_final_state, load_sequence_memory
 
 if __name__ == "__main__":
     # Define kernel parameters, field parameters, and external input parameters
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     sequence_memory.add_connection(field2, weight=0.5)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "learning"  # Change this to "recall" for the other mode
+    mode = "recall"  # Change this to "recall" for the other mode
     if mode == "learning":
         simultaneous_integration([sequence_memory])
 
@@ -35,7 +35,9 @@ if __name__ == "__main__":
         save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)  # Save the last time step
 
     elif mode == "recall":
-        simultaneous_integration([sequence_memory, field2])
+        # Load the sequence memory from file
+        sequence_memory_data = load_sequence_memory()  # You can provide a filename if needed
+        print("Recall mode activated. Sequence memory data loaded.")
 
     # Plot final states of the fields
     plotter = Plotter([sequence_memory, field2])
