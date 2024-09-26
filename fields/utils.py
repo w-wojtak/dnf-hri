@@ -1,8 +1,8 @@
 import numpy as np
 
 # Example kernel function (oscillatory behavior)
-def kernel_osc(x, kernel_param1, kernel_param2):
-    return np.exp(-x**2 / (2 * kernel_param1)) * np.cos(2 * np.pi * x / kernel_param2)
+def kernel_osc(x, a, b, alpha):
+    return a * (np.exp(-b*abs(x)) * ((b * np.sin(abs(alpha*x)))+np.cos(alpha*x)))
 
 # Example external input function (Gaussian pulse active for some time)
 def external_input_function(x, t, input_pars):
