@@ -2,6 +2,7 @@
 
 import numpy as np
 from fields.utils import external_input_function, kernel_osc
+from fields.utils import load_sequence_memory
 
 
 class Field:
@@ -22,8 +23,22 @@ class Field:
 
         # State history and current state initialization
         self.history_u = np.zeros([len(self.t), len(self.x)])
-        self.activity = np.zeros([len(self.t), len(self.x)])  # Initialize activity array
-        self.u_field = h_0 * np.ones(np.shape(self.x))
+
+        if field_type == "decision":
+            # Load the sequence memory data
+            self.u_field = load_sequence_memory()  # Assuming this loads the data correctly
+            self.loaded_internal_input = self.u_field  # Store loaded data for internal input
+        else:
+            self.u_field = h_0 * np.ones(np.shape(self.x))  # Default initialization
+            self.loaded_internal_input = np.zeros_like(self.x)  # Default for other types
+
+        self.activity = np.zeros([len(self.t), len(self.x)])  # Initialize activity
+
+
+
+        # Initialize activity to zeros
+        self.activity = np.zeros([len(self.t), len(self.x)])  # This stays the same for both types
+
         self.h_u = h_0 * np.ones(np.shape(self.x))
 
         # Fourier transform of the kernel function
@@ -61,11 +76,16 @@ class Field:
         return total_input
 
     def get_internal_input(self, i):
-        # Here, define the logic for obtaining internal input
-        # This could be influenced by connected fields or other mechanisms
-        internal_input = np.zeros_like(self.x)  # Replace with actual logic
+        # Check if the field type is "decision"
+        if self.field_type == "decision":
+            # Return the loaded internal input which remains constant
+            return self.loaded_internal_input  # Use the stored loaded data for internal input
+
+        # For other field types, calculate internal input normally
+        internal_input = np.zeros_like(self.x)  # Initialize to zeros
         for connected_field, weight in self.connected_fields:
-            internal_input += weight * connected_field.u_field  # Example of using connected fields
+            internal_input += weight * connected_field.u_field  # Accumulate input from connected fields
+
         return internal_input
 
     def add_connection(self, field, weight=0.0):

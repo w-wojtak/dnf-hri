@@ -37,18 +37,19 @@ def save_final_state(data, name):
 
 
 def load_sequence_memory(filename=None):
-    # If no filename is provided, load the latest file in the data folder
     if filename is None:
-        # List all files in the 'data' directory
         files = [f for f in os.listdir('data') if f.endswith('.npy')]
         if not files:
             raise FileNotFoundError("No .npy files found in the 'data' folder.")
 
-        # Get the latest file based on modification time
         latest_file = max([os.path.join('data', f) for f in files], key=os.path.getmtime)
         filename = latest_file
 
-    # Load the sequence memory data from the specified file
     data = np.load(filename)
     print(f"Loaded sequence memory from {filename}")
+
+    # Ensure the data is at least 2D
+    if data.ndim == 1:  # If it's 1D, reshape to 2D (1 row, many columns)
+        data = data.reshape(1, -1)
     return data
+

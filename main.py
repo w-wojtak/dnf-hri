@@ -16,18 +16,18 @@ if __name__ == "__main__":
 
     # Define external input parameters for field2
     external_input_pars2 = [
-        (50.0, 1.5, 10, 15)  # Input for field2
+        (0, 1, 0, 0)  # Input for field2
     ]
 
     # Create fields
     sequence_memory = Field(kernel_pars, field_pars, external_input_pars1, field_type="sequence_memory")
-    field2 = Field(kernel_pars, field_pars, external_input_pars2, name="Field2")
+    action_onset = Field(kernel_pars, field_pars, external_input_pars2, field_type="decision")
 
     # Add connection (example)
-    sequence_memory.add_connection(field2, weight=0.5)  # Connect field2 to sequence_memory
+    sequence_memory.add_connection(action_onset, weight=0.0)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "learning"  # Change this to "recall" for the other mode
+    mode = "recall"  # Change this to "recall" for the other mode
     if mode == "learning":
         simultaneous_integration([sequence_memory])
 
@@ -36,9 +36,10 @@ if __name__ == "__main__":
 
     elif mode == "recall":
         # Load the sequence memory from file
-        sequence_memory_data = load_sequence_memory()  # You can provide a filename if needed
-        print("Recall mode activated. Sequence memory data loaded.")
+        # sequence_memory_data = load_sequence_memory()  # You can provide a filename if needed
+        # print("Recall mode activated. Sequence memory data loaded.")
+        simultaneous_integration([action_onset])
 
     # Plot final states of the fields
-    plotter = Plotter([sequence_memory, field2])
+    plotter = Plotter([sequence_memory, action_onset])
     plotter.plot_final_states()
