@@ -1,4 +1,6 @@
+import os
 import numpy as np
+from datetime import datetime
 
 # Example kernel function (oscillatory behavior)
 def kernel_osc(x, a, b, alpha):
@@ -19,3 +21,16 @@ def simultaneous_integration(fields):
     for i in range(num_time_steps):
         for field in fields:
             field.integrate_single_step(i)
+
+
+def save_final_state(data, name):
+    # Create the 'data' directory if it doesn't exist
+    os.makedirs('data', exist_ok=True)
+
+    # Get current date and time for the file name
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_name = f"data/{name}_final_state_{current_time}.npy"
+
+    # Save the final state to a .npy file
+    np.save(file_name, data)
+    print(f"Final state saved to {file_name}")

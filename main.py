@@ -2,7 +2,7 @@
 
 from fields.field import Field
 from fields.plotter import Plotter
-from fields.utils import simultaneous_integration
+from fields.utils import simultaneous_integration, save_final_state
 
 if __name__ == "__main__":
     # Define kernel parameters, field parameters, and external input parameters
@@ -30,6 +30,10 @@ if __name__ == "__main__":
     mode = "learning"  # Change this to "recall" for the other mode
     if mode == "learning":
         simultaneous_integration([sequence_memory])
+
+        # Save the final state of sequence_memory
+        save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)  # Save the last time step
+
     elif mode == "recall":
         simultaneous_integration([sequence_memory, field2])
 
