@@ -2,15 +2,14 @@ import numpy as np
 from fields.utils import kernel_osc, external_input_function  # Import from utils.py
 
 class Field:
-    def __init__(self, kernel_pars, field_pars, external_input_pars, tau_h=100, h_0=0, input_flag=True, name="Field"):
+    def __init__(self, kernel_pars, field_pars, external_input_pars_list, tau_h=100, h_0=0, input_flag=True, name="Field"):
         self.name = name
         self.kernel_pars = kernel_pars
-        self.field_pars = field_pars  # Store field parameters
-        self.x_lim, self.t_lim, self.dx, self.dt, self.theta = field_pars
+        self.x_lim, self.t_lim, self.dx, self.dt, self.theta = field_pars  # Unpack field_pars
         self.tau_h = tau_h
         self.h_0 = h_0
         self.input_flag = input_flag
-        self.external_input_pars = external_input_pars
+        self.external_input_pars_list = external_input_pars_list  # List of inputs
 
         # Spatial and temporal grids
         self.x = np.arange(-self.x_lim, self.x_lim + self.dx, self.dx)
@@ -27,12 +26,17 @@ class Field:
         # List of connected fields (internal inputs)
         self.connected_fields = []
 
+    def get_external_input(self, t):
+        return external_input_function(self.x, t, self.external_input_pars_list)
+
+
+
 
     def add_connection(self, field, weight):
         self.connected_fields.append((field, weight))
 
-    def get_external_input(self, t):
-        return external_input_function(self.x, t, self.external_input_pars)
+    # def get_external_input(self, t):
+    #     return external_input_function(self.x, t, self.external_input_pars)
 
     def get_internal_input(self, i):
         internal_input = np.zeros_like(self.u_field)
