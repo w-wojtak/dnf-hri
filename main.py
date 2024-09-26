@@ -1,22 +1,23 @@
 from fields.field import Field
-from fields.simulator import Simulator
 from fields.plotter import Plotter
-from fields.field_network import FieldNetwork
+from fields.utils import simultaneous_integration
 
 if __name__ == "__main__":
-    # Set up simulation parameters
-    simulation_length = 100  # Define the length of the simulation
-    use_plotting = True  # Toggle Plotter on or off
+    # Define kernel parameters, field parameters, and external input parameters
+    kernel_pars = (1.0, 1.0)
+    field_pars = (10, 100, 0.1, 0.01, 0.5)  # x_lim, t_lim, dx, dt, theta
+    external_input_pars = (0.0, 1.0, 10, 50)  # center, width, active_start, active_end
 
-    # Create fields, network, etc.
-    field1 = Field(...)
-    field2 = Field(...)
+    # Create two fields with external inputs
+    field1 = Field(kernel_pars, field_pars, external_input_pars, name="Field1")
+    field2 = Field(kernel_pars, field_pars, external_input_pars, name="Field2")
 
-    # Create and run simulator
-    simulator = Simulator([field1, field2], simulation_length)
-    simulator.run()
+    # Connect field1 to field2 with a weight of 0.5
+    field2.add_connection(field1, weight=1.5)
 
-    # Optionally plot results
-    if use_plotting:
-        plotter = Plotter(simulator)
-        plotter.plot()
+    # Run simultaneous integration for both fields
+    simultaneous_integration([field1, field2])
+
+    # Plot final states of both fields
+    plotter = Plotter([field1, field2])
+    plotter.plot_final_states()
