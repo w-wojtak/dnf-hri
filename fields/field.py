@@ -25,16 +25,13 @@ class Field:
         self.history_u = np.zeros([len(self.t), len(self.x)])
 
         if field_type == "decision":
-            # Load the sequence memory data
-            self.u_field = load_sequence_memory()  # Assuming this loads the data correctly
+            self.u_field = load_sequence_memory()  # Load the sequence memory data
             self.loaded_internal_input = self.u_field  # Store loaded data for internal input
         else:
             self.u_field = h_0 * np.ones(np.shape(self.x))  # Default initialization
             self.loaded_internal_input = np.zeros_like(self.x)  # Default for other types
 
         self.activity = np.zeros([len(self.t), len(self.x)])  # Initialize activity
-
-
 
         # Initialize activity to zeros
         self.activity = np.zeros([len(self.t), len(self.x)])  # This stays the same for both types

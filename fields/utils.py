@@ -2,9 +2,19 @@ import os
 import numpy as np
 from datetime import datetime
 
+
 # Example kernel function (oscillatory behavior)
 def kernel_osc(x, a, b, alpha):
-    return a * (np.exp(-b*abs(x)) * ((b * np.sin(abs(alpha*x)))+np.cos(alpha*x)))
+    return a * (np.exp(-b * abs(x)) * ((b * np.sin(abs(alpha * x))) + np.cos(alpha * x)))
+
+
+def kernel_gauss(x, a_ex, s_ex, w_in):
+    return a_ex * np.exp(-0.5 * x ** 2 / s_ex ** 2) - w_in
+
+
+def kernel_osc(x, a, b, alpha):
+    return a * (np.exp(-b * abs(x)) * ((b * np.sin(abs(alpha * x))) + np.cos(alpha * x)))
+
 
 def external_input_function(x, t, input_pars):
     center, width, active_start, active_end = input_pars
@@ -52,4 +62,3 @@ def load_sequence_memory(filename=None):
     if data.ndim == 1:  # If it's 1D, reshape to 2D (1 row, many columns)
         data = data.reshape(1, -1)
     return data
-
