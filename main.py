@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # sequence_memory.add_connection(action_onset, weight=0.0)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "learning"  # "learning" / "recall" mode choice
+    mode = "recall"  # "learning" / "recall" mode choice
 
     if mode == "learning":
         # Create fields

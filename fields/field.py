@@ -72,14 +72,13 @@ class Field:
         return total_input
 
     def get_internal_input(self, i):
-        # Check if the field type is "decision"
+        # Initialize internal input with the loaded data for "decision" field type
         if self.field_type == "decision":
-            # Return the loaded internal input which remains constant
-            return self.loaded_internal_input  # Use the stored loaded data for internal input
+            internal_input = self.loaded_internal_input.copy()  # Start with the loaded internal input
+        else:
+            internal_input = np.zeros_like(self.u_field)  # For other types, initialize to zeros
 
-        # For other field types, calculate internal input normally
-        internal_input = np.zeros_like(self.u_field)  # Ensure it's 1D and matches u_field shape
-
+        # Add inputs from connected fields
         for connected_field, weight in self.connected_fields:
             internal_input += weight * connected_field.u_field  # Accumulate input from connected fields
 
