@@ -25,12 +25,11 @@ class Field:
         self.history_u = np.zeros([len(self.t), len(self.x)])
 
         if field_type == "decision":
-            self.u_field = load_sequence_memory()  # Load the sequence memory data
+            self.u_field = load_sequence_memory().flatten()  # Ensure it's 1D
             self.loaded_internal_input = self.u_field  # Store loaded data for internal input
         else:
             self.u_field = h_0 * np.ones(np.shape(self.x))  # Default initialization
             self.loaded_internal_input = np.zeros_like(self.x)  # Default for other types
-
         self.activity = np.zeros([len(self.t), len(self.x)])  # Initialize activity
 
         # Initialize activity to zeros
@@ -79,7 +78,8 @@ class Field:
             return self.loaded_internal_input  # Use the stored loaded data for internal input
 
         # For other field types, calculate internal input normally
-        internal_input = np.zeros_like(self.x)  # Initialize to zeros
+        internal_input = np.zeros_like(self.u_field)  # Ensure it's 1D and matches u_field shape
+
         for connected_field, weight in self.connected_fields:
             internal_input += weight * connected_field.u_field  # Accumulate input from connected fields
 

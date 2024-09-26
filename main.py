@@ -15,25 +15,36 @@ if __name__ == "__main__":
         (30.0, 1.0, 40, 45)  # Input 2 parameters
     ]
 
-    # Create fields
-    sequence_memory = Field(kernel_sm, field_pars, external_input_pars1, field_type="sequence_memory")
-    action_onset = Field(kernel_action, field_pars, [(0, 1, 0, 0)], field_type="decision")
-
     # Add connection (example)
-    sequence_memory.add_connection(action_onset, weight=0.0)  # Connect field2 to sequence_memory
+    # sequence_memory.add_connection(action_onset, weight=0.0)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "recall"  # "learning" / "recall" mode choice
+    mode = "learning"  # "learning" / "recall" mode choice
 
     if mode == "learning":
+        # Create fields
+        sequence_memory = Field(kernel_sm, field_pars, external_input_pars1, name="Sequence Memory",
+                                field_type="sequence_memory")
+
         simultaneous_integration([sequence_memory])
+
+        # Plot final states of the fields
+        plotter = Plotter([sequence_memory])
+        plotter.plot_final_states()
 
         # Save the final state of sequence_memory
         save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)  # Save the last time step
 
     elif mode == "recall":
-        simultaneous_integration([action_onset])
+        # Create fields
+        action_onset = Field(kernel_action, field_pars, [(0, 1, 0, 0)], name="Action Onset", field_type="decision")
+        working_memory = Field(kernel_sm, field_pars, [(0, 1, 0, 0)], name="Working Memory")
 
-    # Plot final states of the fields
-    plotter = Plotter([sequence_memory, action_onset])
-    plotter.plot_final_states()
+
+        simultaneous_integration([action_onset, working_memory])
+
+        # Plot final states of the fields
+        plotter = Plotter([action_onset, working_memory])
+        plotter.plot_final_states()
+
+
