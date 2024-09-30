@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # sequence_memory.add_connection(action_onset, weight=0.0)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "recall"  # "learning" / "recall" mode choice
+    mode = "learning"  # "learning" / "recall" mode choice
 
     if mode == "learning":
         # Create fields
@@ -31,6 +31,10 @@ if __name__ == "__main__":
         # Plot final states of the fields
         plotter = Plotter([sequence_memory])
         plotter.plot_final_states()
+
+        # Plot activity evolution over time
+        plotter.animate_activity(field_pars, interval=10,
+                                 input_flag=False)  # Set input_flag=True if you want to plot inputs
 
         # Save the final state of sequence_memory
         save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)  # Save the last time step
