@@ -26,7 +26,7 @@ class Field:
         self.history_u = np.zeros([len(self.t), len(self.x)])
 
         if field_type == "decision":
-            self.u_field = load_sequence_memory().flatten()  # Ensure it's 1D
+            self.u_field = load_sequence_memory().flatten() - 3.6 # Ensure it's 1D
             self.loaded_internal_input = self.u_field  # Store loaded data for internal input
         else:
             self.u_field = h_0 * np.ones(np.shape(self.x))  # Default initialization
