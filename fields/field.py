@@ -3,6 +3,7 @@
 import numpy as np
 from fields.utils import external_input_function, kernel_osc
 from fields.utils import load_sequence_memory
+import matplotlib.pyplot as plt
 
 
 class Field:
@@ -86,3 +87,15 @@ class Field:
 
     def add_connection(self, field, weight=0.0):
         self.connected_fields.append((field, weight))
+
+
+    def plot_loaded_field(self):
+        """Plots the loaded u_field for the decision field."""
+        if self.field_type == "decision":
+            plt.plot(self.x, self.u_field)
+            plt.xlabel('x')
+            plt.ylabel('Activity (u_field)')
+            plt.title(f'Loaded Field Data for {self.name}')
+            plt.show()
+        else:
+            print(f"No loaded field to plot for field type {self.field_type}")
