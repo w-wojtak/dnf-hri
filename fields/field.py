@@ -46,9 +46,18 @@ class Field:
         # List of connected fields (internal inputs)
         self.connected_fields = []
 
+        # Initialize histories for internal and external inputs
+        self.history_external_input = np.zeros([len(self.t), len(self.x)])  # External input history
+        self.history_internal_input = np.zeros([len(self.t), len(self.x)])  # Internal input history
+
+
     def integrate_single_step(self, i):
         external_input = self.get_external_input(self.t[i])
         internal_input = self.get_internal_input(i)
+
+        # Track the internal and external inputs for this time step
+        self.history_external_input[i, :] = external_input
+        self.history_internal_input[i, :] = internal_input
 
         f = np.heaviside(self.u_field - self.theta, 1)
         f_hat = np.fft.fft(f)
