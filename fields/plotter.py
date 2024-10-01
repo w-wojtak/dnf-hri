@@ -33,14 +33,13 @@ class Plotter:
         if num_fields == 1:
             axes = [axes]
 
-        # Get axis limits for all fields based on the max/min values of activity
-        max_activity = max([field.activity.max() for field in self.fields])
-        min_activity = min([field.activity.min() for field in self.fields])
-
-        # Prepare the plot and set axis limits
+        # Prepare the plot and set axis limits individually for each field
         for i, field in enumerate(self.fields):
+            max_activity = field.activity.max()  # Max value for the specific field
+            min_activity = field.activity.min()  # Min value for the specific field
+
             axes[i].set_xlim(-field.x_lim, field.x_lim)
-            axes[i].set_ylim(min_activity, max_activity)
+            axes[i].set_ylim(min_activity, max_activity)  # Set y-limits individually
             axes[i].set_xlabel('x')
             axes[i].set_ylabel('Activity')
             axes[i].set_title(f"{field.name} - Time Step: 0")
@@ -60,3 +59,4 @@ class Plotter:
             plt.pause(0.1)
 
         plt.show()
+
