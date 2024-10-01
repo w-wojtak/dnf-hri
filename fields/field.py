@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 
 
 class Field:
-    def __init__(self, kernel_pars, field_pars, external_input_pars_list, tau_h=100, h_0=0, input_flag=True,
+    def __init__(self, kernel_pars, field_pars,  external_input_pars_list=None, tau_h=100, h_0=0, input_flag=True,
                  name="Field", field_type=None, theta=1.0):
         self.kernel_pars = kernel_pars
         self.field_pars = field_pars
-        self.external_input_pars_list = external_input_pars_list
+        self.external_input_pars_list = external_input_pars_list if external_input_pars_list is not None else []
         self.name = name
         self.field_type = field_type  # New attribute for field type
         self.x_lim, self.t_lim, self.dx, self.dt = field_pars
