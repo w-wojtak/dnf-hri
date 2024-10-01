@@ -17,9 +17,9 @@ def kernel_osc(x, a, b, alpha):
 
 
 def external_input_function(x, t, input_pars):
-    center, width, active_start, active_end = input_pars
+    center, amplitude, width, active_start, active_end = input_pars
     if active_start <= t <= active_end:  # Check if the input is active
-        return np.exp(-((x - center) ** 2) / (2 * (width ** 2)))  # Gaussian input
+        return amplitude * (np.exp(-((x - center) ** 2) / (2 * (width ** 2))))  # Gaussian input
     else:
         return np.zeros_like(x)  # Return zero if not active
 

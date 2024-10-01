@@ -7,16 +7,18 @@ import matplotlib.pyplot as plt
 
 
 class Field:
-    def __init__(self, kernel_pars, field_pars, external_input_pars_list, tau_h=100, h_0=0, input_flag=True, name="Field", field_type=None):
+    def __init__(self, kernel_pars, field_pars, external_input_pars_list, tau_h=100, h_0=0, input_flag=True,
+                 name="Field", field_type=None, theta=1.0):
         self.kernel_pars = kernel_pars
         self.field_pars = field_pars
         self.external_input_pars_list = external_input_pars_list
         self.name = name
         self.field_type = field_type  # New attribute for field type
-        self.x_lim, self.t_lim, self.dx, self.dt, self.theta = field_pars
+        self.x_lim, self.t_lim, self.dx, self.dt = field_pars
         self.tau_h = tau_h
         self.h_0 = h_0
         self.input_flag = input_flag
+        self.theta = theta
 
         # Spatial and temporal grids
         self.x = np.arange(-self.x_lim, self.x_lim + self.dx, self.dx)
@@ -26,8 +28,8 @@ class Field:
         self.history_u = np.zeros([len(self.t), len(self.x)])
 
         if field_type == "decision":
-            self.u_field = load_sequence_memory().flatten() - 3.6 # Ensure it's 1D
-            self.loaded_internal_input = self.u_field  # Store loaded data for internal input
+            self.u_field = load_sequence_memory().flatten() - 7  # Ensure it's 1D
+            self.loaded_internal_input = load_sequence_memory().flatten()  - 7 # Store loaded data for internal input
         else:
             self.u_field = h_0 * np.ones(np.shape(self.x))  # Default initialization
             self.loaded_internal_input = np.zeros_like(self.x)  # Default for other types
@@ -79,15 +81,32 @@ class Field:
         else:
             internal_input = np.zeros_like(self.u_field)  # For other types, initialize to zeros
 
-        # Add inputs from connected fields
-        for connected_field, weight in self.connected_fields:
-            internal_input += weight * connected_field.u_field  # Accumulate input from connected fields
+        # Add inputs from connected fields with their custom parameters
+        for connected_field, weight, connection_params in self.connected_fields:
+            # Extract connection-specific parameters
+            threshold = connection_params.get('threshold', None)  # Get threshold if provided
+            # scaling_factor = connection_params.get('scaling', 1.0)  # Default scaling factor is 1.0
+
+            # Apply threshold logic if a threshold is provided
+            if threshold is not None:
+                mask = connected_field.u_field > threshold  # Create a mask where activity exceeds threshold
+                internal_input += weight * connected_field.u_field * mask
+            else:
+                # If no threshold, just apply the connection with weight and scaling factor
+                internal_input += weight * connected_field.u_field
 
         return internal_input
 
-    def add_connection(self, field, weight=0.0):
-        self.connected_fields.append((field, weight))
-
+    def add_connection(self, field, weight=0.0, connection_params=None):
+        """
+        Adds a connection to another field with an optional weight and custom connection parameters.
+        :param field: The connected field.
+        :param weight: The weight of the connection.
+        :param connection_params: A dictionary of connection-specific parameters like thresholds.
+        """
+        if connection_params is None:
+            connection_params = {}  # If no parameters provided, use an empty dictionary
+        self.connected_fields.append((field, weight, connection_params))
 
     def plot_loaded_field(self):
         """Plots the loaded u_field for the decision field."""
