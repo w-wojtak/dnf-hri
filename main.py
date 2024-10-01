@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # sequence_memory.add_connection(action_onset, weight=0.0)  # Connect field2 to sequence_memory
 
     # Mode: Learning
-    mode = "recall"  # "learning" / "recall" mode choice
+    mode = "learning"  # "learning" / "recall" mode choice
 
     if mode == "learning":
         # Create fields
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         simultaneous_integration([action_onset, working_memory])
 
         # Plot final states of the fields
-        plotter = Plotter([action_onset])
+        plotter = Plotter([action_onset, working_memory])
         plotter.plot_final_states()
 
         # Plot activity evolution over time
