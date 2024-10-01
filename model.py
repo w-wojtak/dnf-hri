@@ -1,6 +1,12 @@
+# model.py
+
 from fields.field import Field
-from fields.utils import simultaneous_integration, save_final_state, save_external_input_params, \
-    load_external_input_params
+from fields.utils import (
+    simultaneous_integration,
+    save_final_state,
+    save_external_input_params,
+    load_external_input_params,
+)
 from fields.plotter import Plotter
 
 # Constants
@@ -13,9 +19,8 @@ FIELD_PARS = (80, 100, 0.1, 0.1)  # x_lim, t_lim, dx, dt
 EXTERNAL_INPUT_PARS1 = [
     (0.0, 3.0, 1.5, 10, 15),  # Input 1 parameters: center, amplitude, width, active_start, active_end
     (30.0, 3.0, 1.5, 30, 35),  # Input 2 parameters
-    (-40.0, 3.0, 1.5, 50, 55)
+    (-40.0, 3.0, 1.5, 50, 55),
 ]
-
 
 def create_sequence_memory():
     """Create and return the Sequence Memory field."""
@@ -26,9 +31,8 @@ def create_sequence_memory():
         tau_h=20,
         name="Sequence Memory",
         field_type="sequence_memory",
-        theta=1.5
+        theta=1.5,
     )
-
 
 def create_recall_fields():
     """Create and return the Action Onset and Working Memory fields."""
@@ -40,7 +44,7 @@ def create_recall_fields():
         h_0=0,
         name="Action Onset",
         field_type="decision",
-        theta=1
+        theta=1,
     )
 
     working_memory = Field(
@@ -49,11 +53,10 @@ def create_recall_fields():
         None,  # No external inputs
         h_0=-1.0,
         name="Working Memory",
-        theta=0.5
+        theta=0.5,
     )
 
     return action_onset, working_memory
-
 
 def run_learning_mode():
     """Execute the learning mode."""
@@ -74,6 +77,8 @@ def run_learning_mode():
     input_centers = [param[0] for param in EXTERNAL_INPUT_PARS1]
     plotter.plot_activity_at_input_centers(input_centers, interval=10)
 
+    # Animate activity
+    plotter.animate_activity(FIELD_PARS, interval=10)
 
 def run_recall_mode():
     """Execute the recall mode."""
@@ -95,3 +100,6 @@ def run_recall_mode():
 
     # Plot the evolution of fields' activities at the specified input centers
     plotter.plot_activity_at_input_centers(input_centers, interval=10)
+
+    # Animate activity
+    plotter.animate_activity(FIELD_PARS, interval=10)
