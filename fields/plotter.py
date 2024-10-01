@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import time
+from fields.utils import load_external_input_params
 
 
 class Plotter:
@@ -72,4 +73,33 @@ class Plotter:
 
         plt.show()
 
+    def plot_activity_at_input_centers(self, input_centers, interval=10):
+        """Plots the evolution of fields' activities at specified input centers over time, including theta lines."""
+        num_fields = len(self.fields)
+        num_centers = len(input_centers)
 
+        # Create a figure with subplots for each field
+        fig, axes = plt.subplots(num_fields, 1, figsize=(8, 4 * num_fields), sharex=True)
+
+        if num_fields == 1:
+            axes = [axes]  # Ensure axes is always iterable
+
+        # Plot activity at each input center for each field
+        for i, field in enumerate(self.fields):
+            # Find the closest indices for each input center
+            closest_indices = [np.abs(field.x - center).argmin() for center in input_centers]
+
+            for idx in closest_indices:
+                axes[i].plot(field.t, field.activity[:, idx], label=f'Activity at x={field.x[idx]:.2f}')
+
+            # Add a horizontal line for theta
+            axes[i].axhline(y=field.theta, color='r', linestyle='--', label=f'Theta = {field.theta:.2f}')
+
+            axes[i].set_title(f"{field.name} Activity at Bump Centers")
+            axes[i].set_ylabel('Activity')
+            axes[i].legend()
+            axes[i].grid(True)
+
+        axes[-1].set_xlabel('Time')
+        plt.tight_layout()
+        plt.show()

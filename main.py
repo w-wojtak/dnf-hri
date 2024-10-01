@@ -2,7 +2,9 @@
 
 from fields.field import Field
 from fields.plotter import Plotter
-from fields.utils import simultaneous_integration, save_final_state, load_sequence_memory
+from fields.utils import simultaneous_integration, load_sequence_memory
+from fields.utils import save_final_state, save_external_input_params, load_external_input_params
+
 
 if __name__ == "__main__":
     # Define kernel parameters, field parameters, and external input parameters
@@ -44,6 +46,16 @@ if __name__ == "__main__":
         # Save the final state of sequence_memory
         save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)  # Save the last time step
 
+        # Save the parameters of external inputs
+        save_external_input_params(external_input_pars1)
+
+        # Extract input centers
+        input_centers = [param[0] for param in
+                         external_input_pars1]  # Assuming centers are the first element in the tuple
+
+        # Plot the evolution of fields' activities at the specified input centers
+        plotter.plot_activity_at_input_centers(input_centers, interval=10)
+
     elif mode == "recall":
         # Create fields
         action_onset = Field(kernel_action, field_pars, [(0, 0, 1, 0, 0)], tau_h=20, h_0=0,
@@ -63,7 +75,18 @@ if __name__ == "__main__":
         plotter.plot_final_states()
 
         # Plot activity evolution over time
-        plotter.animate_activity(field_pars, interval=10, plot_inputs=True)
+        # plotter.animate_activity(field_pars, interval=10, plot_inputs=True)
+
+        # Load external input parameters
+        external_input_params = load_external_input_params()
+
+        # Extract input centers
+        input_centers = [param[0] for param in
+                         external_input_params]  # Assuming centers are the first element in the tuple
+
+        # Plot the evolution of fields' activities at the specified input centers
+        plotter.plot_activity_at_input_centers(input_centers, interval=10)
+
 
 
 
