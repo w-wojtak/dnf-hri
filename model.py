@@ -1,5 +1,3 @@
-# model.py
-
 from fields.field import Field
 from fields.utils import (
     simultaneous_integration,
@@ -58,14 +56,17 @@ def create_recall_fields():
 
     return action_onset, working_memory
 
-def run_learning_mode():
+def run_learning_mode(plot_options):
     """Execute the learning mode."""
     sequence_memory = create_sequence_memory()
     simultaneous_integration([sequence_memory])
 
-    # Plot final states of the fields
+    # Initialize plotter
     plotter = Plotter([sequence_memory])
-    plotter.plot_final_states()
+
+    # Plot final states if specified
+    if plot_options.get("plot_final_states", False):
+        plotter.plot_final_states()
 
     # Save the final state of sequence_memory
     save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)
@@ -75,12 +76,16 @@ def run_learning_mode():
 
     # Extract input centers and plot the evolution of fields' activities
     input_centers = [param[0] for param in EXTERNAL_INPUT_PARS1]
-    plotter.plot_activity_at_input_centers(input_centers, interval=10)
 
-    # Animate activity
-    plotter.animate_activity(FIELD_PARS, interval=10)
+    # Plot activity at input centers if specified
+    if plot_options.get("plot_activity_at_input_centers", False):
+        plotter.plot_activity_at_input_centers(input_centers, interval=10)
 
-def run_recall_mode():
+    # Animate activity if specified
+    if plot_options.get("animate_activity", False):
+        plotter.animate_activity(FIELD_PARS, interval=10)
+
+def run_recall_mode(plot_options):
     """Execute the recall mode."""
     action_onset, working_memory = create_recall_fields()
 
@@ -90,16 +95,21 @@ def run_recall_mode():
 
     simultaneous_integration([action_onset, working_memory])
 
-    # Plot final states of the fields
+    # Initialize plotter
     plotter = Plotter([action_onset, working_memory])
-    plotter.plot_final_states()
+
+    # Plot final states if specified
+    if plot_options.get("plot_final_states", False):
+        plotter.plot_final_states()
 
     # Load external input parameters and extract input centers
     external_input_params = load_external_input_params()
     input_centers = [param[0] for param in external_input_params]
 
-    # Plot the evolution of fields' activities at the specified input centers
-    plotter.plot_activity_at_input_centers(input_centers, interval=10)
+    # Plot activity at input centers if specified
+    if plot_options.get("plot_activity_at_input_centers", False):
+        plotter.plot_activity_at_input_centers(input_centers, interval=10)
 
-    # Animate activity
-    plotter.animate_activity(FIELD_PARS, interval=10)
+    # Animate activity if specified
+    if plot_options.get("animate_activity", False):
+        plotter.animate_activity(FIELD_PARS, interval=10)
