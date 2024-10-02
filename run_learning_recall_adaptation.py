@@ -11,7 +11,7 @@ def main(mode, plot_options):
 
 if __name__ == "__main__":
     # Mode: Learning or Recall
-    mode = "learning"  # Change to "learning" or "recall" as needed
+    mode = "recall"  # Change to "learning" or "recall" as needed
 
     # Define plot options
     plot_options = {
