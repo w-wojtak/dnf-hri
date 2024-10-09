@@ -75,10 +75,11 @@ def create_recall_fields():
     return action_onset, working_memory, human_feedback
 
 
-def run_learning_mode(plot_options):
+def run_learning_mode(plot_options, input_centers):
     """Execute the learning mode."""
     sequence_memory = create_sequence_memory()
-    simultaneous_integration([sequence_memory])
+    simultaneous_integration([sequence_memory], input_centers)
+    # simultaneous_integration(fields, input_centers)
 
     # Initialize plotter
     plotter = Plotter([sequence_memory])
@@ -105,7 +106,7 @@ def run_learning_mode(plot_options):
         plotter.animate_activity(FIELD_PARS, interval=10)
 
 
-def run_recall_mode(plot_options):
+def run_recall_mode(plot_options, input_centers):
     """Execute the recall mode."""
     action_onset, working_memory, human_feedback = create_recall_fields()
 
@@ -113,7 +114,9 @@ def run_recall_mode(plot_options):
     working_memory.add_connection(action_onset, weight=1.0, connection_params={'threshold': 1})
     action_onset.add_connection(working_memory, weight=-5.0, connection_params={'threshold': 0.5})
 
-    simultaneous_integration([action_onset, working_memory, human_feedback])
+    # simultaneous_integration([action_onset, working_memory, human_feedback])
+    fields = [action_onset, working_memory, human_feedback]  # List of Field instances
+    simultaneous_integration(fields, input_centers)
 
     # Initialize plotter
     plotter = Plotter([action_onset, working_memory, human_feedback])

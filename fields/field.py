@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 class Field:
     def __init__(self, kernel_pars, field_pars,  external_input_pars_list=None, tau_h=100, h_0=0, input_flag=True,
                  name="Field", field_type=None, theta=1.0):
+        # Existing code
         self.kernel_pars = kernel_pars
         self.field_pars = field_pars
         self.external_input_pars_list = external_input_pars_list if external_input_pars_list is not None else []
@@ -49,6 +50,30 @@ class Field:
         # Initialize histories for internal and external inputs
         self.history_external_input = np.zeros([len(self.t), len(self.x)])  # External input history
         self.history_internal_input = np.zeros([len(self.t), len(self.x)])  # Internal input history
+
+        # Initialize monitoring state for input centers
+        self.threshold_crossed = {}
+
+
+    def monitor_action_onset(self, input_centers, i):
+        """
+        Monitors the action_onset field at specific positions (input_centers).
+        If the activity at these positions reaches or exceeds the threshold, a message is printed once.
+        """
+        for center in input_centers:
+            # Find the closest index to the center position in the spatial grid self.x
+            closest_idx = np.abs(self.x - center).argmin()
+
+            # Initialize the monitoring state for this center if not already done
+            if center not in self.threshold_crossed:
+                self.threshold_crossed[center] = False
+
+            # Check if the activity at this position exceeds the threshold and hasn't been printed yet
+            if self.u_field[closest_idx] >= self.theta and not self.threshold_crossed[center]:
+                # Print the message with 2 decimal places for position, activity, and time
+                print(f"Threshold reached at position {self.x[closest_idx]:.2f} at time {self.t[i]:.2f}")
+                # Mark this center as having crossed the threshold
+                self.threshold_crossed[center] = True
 
 
     def integrate_single_step(self, i):

@@ -26,12 +26,24 @@ def external_input_function(x, t, input_pars):
 
 
 # Simultaneous integration function to handle multiple fields
-def simultaneous_integration(fields):
+def simultaneous_integration(fields, input_centers):
+    """
+    Integrates multiple fields over time and monitors action_onset at input_centers.
+    :param fields: List of Field objects
+    :param input_centers: Positions (x values) to monitor in the action_onset field
+    """
     num_time_steps = len(fields[0].t)
+
+    # Find the action_onset field (assuming it exists in the list)
+    action_onset_field = next((field for field in fields if field.name == "Action Onset"), None)
 
     for i in range(num_time_steps):
         for field in fields:
             field.integrate_single_step(i)
+
+        # After each integration step, monitor the action_onset field at the input_centers
+        if action_onset_field and input_centers is not None:
+            action_onset_field.monitor_action_onset(input_centers, i)
 
 
 def save_final_state(data, name):
