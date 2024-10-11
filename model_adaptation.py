@@ -72,7 +72,17 @@ def create_recall_fields():
         theta=1,
     )
 
-    return action_onset, working_memory, human_feedback
+    robot_feedback = Field(
+        KERNEL_ACTION,
+        FIELD_PARS,
+        None,
+        tau_h=20,
+        h_0=0,
+        name="Robot feedback",
+        theta=1,
+    )
+
+    return action_onset, working_memory, human_feedback, robot_feedback
 
 
 def run_learning_mode(plot_options, input_centers):
@@ -108,18 +118,18 @@ def run_learning_mode(plot_options, input_centers):
 
 def run_recall_mode(plot_options, input_centers):
     """Execute the recall mode."""
-    action_onset, working_memory, human_feedback = create_recall_fields()
+    action_onset, working_memory, human_feedback, robot_feedback = create_recall_fields()
 
     # Add connections
     working_memory.add_connection(action_onset, weight=1.0, connection_params={'threshold': 1})
     action_onset.add_connection(working_memory, weight=-5.0, connection_params={'threshold': 0.5})
 
     # simultaneous_integration([action_onset, working_memory, human_feedback])
-    fields = [action_onset, working_memory, human_feedback]  # List of Field instances
+    fields = [action_onset, working_memory, human_feedback, robot_feedback]  # List of Field instances
     simultaneous_integration(fields, input_centers)
 
     # Initialize plotter
-    plotter = Plotter([action_onset, working_memory, human_feedback])
+    plotter = Plotter([action_onset, working_memory, human_feedback, robot_feedback])
 
     # Plot final states if specified
     if plot_options.get("plot_final_states", False):
