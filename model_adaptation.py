@@ -21,9 +21,9 @@ EXTERNAL_INPUT_PARS_SM = [
 ]
 
 EXTERNAL_INPUT_PARS_H = [
-    (0.0, 3.0, 1.5, 20, 25),  # center, amplitude, width, active_start, active_end
-    (30.0, 3.0, 1.5, 38, 43),
-    (-40.0, 3.0, 1.5, 70, 75),
+    (0.0, 3.0, 1.5, 11, 25),  # center, amplitude, width, active_start, active_end
+    (30.0, 3.0, 1.5, 28, 43),
+    (-40.0, 3.0, 1.5, 52, 75),
 ]
 
 
@@ -68,7 +68,7 @@ def create_recall_fields():
         EXTERNAL_INPUT_PARS_H,
         tau_h=20,
         h_0=0,
-        name="Human feedback",
+        name="Human Feedback",
         theta=1,
     )
 
@@ -78,7 +78,7 @@ def create_recall_fields():
         None,
         tau_h=20,
         h_0=0,
-        name="Robot feedback",
+        name="Robot Feedback",
         theta=1,
     )
 
@@ -124,8 +124,11 @@ def run_recall_mode(plot_options, input_centers):
     action_onset, working_memory, human_feedback, robot_feedback = create_recall_fields()
 
     # Add connections
-    working_memory.add_connection(action_onset, weight=1.0, connection_params={'threshold': 1})
+    working_memory.add_connection(human_feedback, weight=1.0, connection_params={'threshold': 1})
+    working_memory.add_connection(robot_feedback, weight=1.0, connection_params={'threshold': 1})
     action_onset.add_connection(working_memory, weight=-5.0, connection_params={'threshold': 0.5})
+    human_feedback.add_connection(working_memory, weight=-5.0, connection_params={'threshold': 0.5})
+    robot_feedback.add_connection(working_memory, weight=-5.0, connection_params={'threshold': 0.5})
 
     # simultaneous_integration([action_onset, working_memory, human_feedback])
     fields = [action_onset, working_memory, human_feedback, robot_feedback]  # List of Field instances

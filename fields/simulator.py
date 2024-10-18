@@ -8,12 +8,12 @@ def simultaneous_integration(fields, input_centers):
 
     # Find the fields
     action_onset_field = next((field for field in fields if field.name == "Action Onset"), None)
-    robot_feedback_field = next((field for field in fields if field.name == "Robot feedback"), None)
+    robot_feedback_field = next((field for field in fields if field.name == "Robot Feedback"), None)
 
     for i in range(num_time_steps):
         # Step 1: Integrate all fields
         for field in fields:
-            if field.name != "Robot feedback":
+            if field.name != "Robot Feedback":
                 field.integrate_single_step(i)  # Regular integration for other fields
 
         # Step 2: After each integration step, monitor the action_onset field

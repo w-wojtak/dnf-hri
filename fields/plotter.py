@@ -69,7 +69,7 @@ class Plotter:
                     int_line.set_ydata(field.history_internal_input[t, :])
 
             plt.draw()
-            plt.pause(0.3)
+            plt.pause(1)
 
         plt.show()
 

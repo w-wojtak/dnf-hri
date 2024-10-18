@@ -61,7 +61,7 @@ class Field:
 
     def integrate_single_step(self, i, threshold_crossings=None):
         # Monitor threshold crossings for "Robot feedback" field
-        if self.name == "Robot feedback" and threshold_crossings:
+        if self.name == "Robot Feedback" and threshold_crossings:
             for crossing_position, crossing_time in threshold_crossings:
                 # Append crossing position and current time to track delays
                 self.crossing_positions.append(crossing_position)
@@ -163,11 +163,27 @@ class Field:
         else:
             internal_input = np.zeros_like(self.u_field)  # For other types, initialize to zeros
 
+        # Check if this field is the Working Memory field
+        if self.name == "Working Memory":
+            # Get the Human and Robot feedback fields (assuming they are connected fields)
+            human_feedback_field = self.get_connected_field_by_name("Human Feedback")
+            robot_feedback_field = self.get_connected_field_by_name("Robot Feedback")
+
+            # Define a threshold for both fields
+            threshold = 1.0  # Customize this threshold as needed
+            constant = 3.0  # Define a scaling constant for the input
+
+            # Check if both fields exceed the threshold
+            if human_feedback_field is not None and robot_feedback_field is not None:
+                mask_human = human_feedback_field.u_field > threshold
+                mask_robot = robot_feedback_field.u_field > threshold
+                internal_input += constant * mask_human * mask_robot
+                return internal_input
+
         # Add inputs from connected fields with their custom parameters
         for connected_field, weight, connection_params in self.connected_fields:
             # Extract connection-specific parameters
             threshold = connection_params.get('threshold', None)  # Get threshold if provided
-            # scaling_factor = connection_params.get('scaling', 1.0)  # Default scaling factor is 1.0
 
             # Apply threshold logic if a threshold is provided
             if threshold is not None:
@@ -178,6 +194,17 @@ class Field:
                 internal_input += weight * connected_field.u_field
 
         return internal_input
+
+    def get_connected_field_by_name(self, name):
+        """
+        Retrieves a connected field by its name.
+        :param name: The name of the connected field to retrieve.
+        :return: The connected field if found, None otherwise.
+        """
+        for field, _, _ in self.connected_fields:
+            if field.name == name:
+                return field
+        return None
 
     def add_connection(self, field, weight=0.0, connection_params=None):
         """
