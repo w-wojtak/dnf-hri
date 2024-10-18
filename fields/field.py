@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 class Field:
-    def __init__(self, kernel_pars, field_pars,  external_input_pars_list=None, tau_h=100, h_0=0, input_flag=True,
+    def __init__(self, kernel_pars, field_pars, external_input_pars_list=None, tau_h=100, h_0=0, input_flag=True,
                  name="Field", field_type=None, theta=1.0):
         # Existing code
         self.kernel_pars = kernel_pars
@@ -29,8 +29,8 @@ class Field:
         self.history_u = np.zeros([len(self.t), len(self.x)])
 
         if field_type == "decision":
-            self.u_field = load_sequence_memory().flatten() - 7  # Ensure it's 1D
-            self.loaded_internal_input = load_sequence_memory().flatten()  - 7 # Store loaded data for internal input
+            self.u_field = load_sequence_memory().flatten() - 6.2  # Ensure it's 1D
+            self.loaded_internal_input = load_sequence_memory().flatten() - 6.2  # Store loaded data for internal input
         else:
             self.u_field = h_0 * np.ones(np.shape(self.x))  # Default initialization
             self.loaded_internal_input = np.zeros_like(self.x)  # Default for other types
@@ -54,29 +54,47 @@ class Field:
         # Initialize monitoring state for input centers
         self.threshold_crossed = {}
 
+        # Initialize lists for tracking threshold crossing delays
+        self.delay_queue = []  # To store delays for threshold crossing messages
+        self.crossing_positions = []  # To store positions of the crossings
+        self.crossing_times = []  # To store the time when crossings occurred
 
-    def monitor_action_onset(self, input_centers, i):
-        """
-        Monitors the action_onset field at specific positions (input_centers).
-        If the activity at these positions reaches or exceeds the threshold, a message is printed once.
-        """
-        for center in input_centers:
-            # Find the closest index to the center position in the spatial grid self.x
-            closest_idx = np.abs(self.x - center).argmin()
+    def integrate_single_step(self, i, threshold_crossings=None):
+        # Monitor threshold crossings for "Robot feedback" field
+        if self.name == "Robot feedback" and threshold_crossings:
+            for crossing_position, crossing_time in threshold_crossings:
+                # Append crossing position and current time to track delays
+                self.crossing_positions.append(crossing_position)
+                self.crossing_times.append(i)
 
-            # Initialize the monitoring state for this center if not already done
-            if center not in self.threshold_crossed:
-                self.threshold_crossed[center] = False
+                # Add a delay for each crossing (customize as needed)
+                self.delay_queue.append(14)  # Delay for the first crossing
+                self.delay_queue.append(16)  # Delay for the second crossing
+                self.delay_queue.append(22)  # Delay for the third crossing
 
-            # Check if the activity at this position exceeds the threshold and hasn't been printed yet
-            if self.u_field[closest_idx] >= self.theta and not self.threshold_crossed[center]:
-                # Print the message with 2 decimal places for position, activity, and time
-                print(f"Threshold reached at position {self.x[closest_idx]:.2f} at time {self.t[i]:.2f}")
-                # Mark this center as having crossed the threshold
-                self.threshold_crossed[center] = True
+        # Check for delayed printing of messages and apply Gaussian input
+        if self.crossing_times:
+            for j in range(len(self.crossing_times)):
+                if i >= self.crossing_times[j] + self.delay_queue[j]:
+                    print(
+                        f"Robot feedback field activated at time {self.t[i]:.2f} due to Action Onset threshold crossing at position {self.crossing_positions[j]:.2f} and time {self.t[self.crossing_times[j]]:.2f}"
+                    )
 
+                    # Apply Gaussian input at the crossing position
+                    center = self.crossing_positions[j]
+                    amplitude = 3.0  # Customize the amplitude as needed
+                    width = 1.5  # Customize the width of the Gaussian input as needed
+                    gaussian_input = amplitude * np.exp(-0.5 * ((self.x - center) / width) ** 2)
 
-    def integrate_single_step(self, i):
+                    # Add the Gaussian input to the field
+                    self.u_field += gaussian_input
+
+                    # Remove the printed crossing from the lists
+                    self.crossing_times.pop(j)
+                    self.crossing_positions.pop(j)
+                    self.delay_queue.pop(j)
+                    break  # Exit the loop after handling a print to avoid index issues
+
         external_input = self.get_external_input(self.t[i])
         internal_input = self.get_internal_input(i)
 
@@ -99,8 +117,38 @@ class Field:
 
         self.u_field += self.dt * (-self.u_field + conv + external_input + internal_input + self.h_u)
 
+        # Track the activity state
         self.history_u[i, :] = self.u_field
-        self.activity[i, :] = self.u_field  # Track activity as the current state
+        self.activity[i, :] = self.u_field
+
+    def monitor_action_onset(self, input_centers, i):
+        """
+        Monitors the action_onset field at specific positions (input_centers).
+        If the activity at these positions reaches or exceeds the threshold, a message is printed once.
+        Returns a list of crossing points and the corresponding time.
+        """
+        threshold_crossings = []  # List to store threshold crossing info
+
+        for center in input_centers:
+            # Find the closest index to the center position in the spatial grid self.x
+            closest_idx = np.abs(self.x - center).argmin()
+
+            # Initialize the monitoring state for this center if not already done
+            if center not in self.threshold_crossed:
+                self.threshold_crossed[center] = False
+
+            # Check if the activity at this position exceeds the threshold and hasn't been printed yet
+            if self.u_field[closest_idx] >= self.theta and not self.threshold_crossed[center]:
+                # Log the crossing point and time
+                threshold_crossings.append((self.x[closest_idx], self.t[i]))
+
+                # Print the message with 2 decimal places for position, activity, and time
+                print(f"Threshold reached at position {self.x[closest_idx]:.2f} at time {self.t[i]:.2f}")
+
+                # Mark this center as having crossed the threshold
+                self.threshold_crossed[center] = True
+
+        return threshold_crossings  # Return the list of crossing points and times
 
     def get_external_input(self, t):
         total_input = np.zeros_like(self.x)

@@ -1,17 +1,17 @@
 from fields.field import Field
 from fields.utils import (
-    simultaneous_integration,
     save_final_state,
     save_external_input_params,
     load_external_input_params,
 )
 from fields.plotter import Plotter
+from fields.simulator import simultaneous_integration
 
 # Constants
 KERNEL_SM = (1, 0.7, 0.9)
 KERNEL_ACTION = (1.5, 0.9, 0.0)
 KERNEL_WM = (1.5, 0.5, 0.75)
-FIELD_PARS = (80, 100, 0.1, 0.1)  # x_lim, t_lim, dx, dt
+FIELD_PARS = (80, 120, 0.1, 0.2)  # x_lim, t_lim, dx, dt
 
 # Define external input parameters for sequence_memory
 EXTERNAL_INPUT_PARS_SM = [
@@ -85,7 +85,11 @@ def create_recall_fields():
     return action_onset, working_memory, human_feedback, robot_feedback
 
 
-def run_learning_mode(plot_options, input_centers):
+def run_learning_mode(plot_options):
+
+    # Extract input centers and plot the evolution of fields' activities
+    input_centers = [param[0] for param in EXTERNAL_INPUT_PARS_SM]
+
     """Execute the learning mode."""
     sequence_memory = create_sequence_memory()
     simultaneous_integration([sequence_memory], input_centers)
@@ -104,8 +108,7 @@ def run_learning_mode(plot_options, input_centers):
     # Save the parameters of external inputs
     save_external_input_params(EXTERNAL_INPUT_PARS_SM)
 
-    # Extract input centers and plot the evolution of fields' activities
-    input_centers = [param[0] for param in EXTERNAL_INPUT_PARS_SM]
+
 
     # Plot activity at input centers if specified
     if plot_options.get("plot_activity_at_input_centers", False):
