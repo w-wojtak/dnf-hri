@@ -1,11 +1,11 @@
 from fields.field import Field
 from fields.utils import (
-    simultaneous_integration,
     save_final_state,
     save_external_input_params,
     load_external_input_params,
 )
 from fields.plotter import Plotter
+from fields.simulator import simultaneous_integration
 
 # Constants
 KERNEL_SM = (1, 0.7, 0.9)
@@ -14,7 +14,7 @@ KERNEL_WM = (1.5, 0.5, 0.75)
 FIELD_PARS = (80, 100, 0.1, 0.1)  # x_lim, t_lim, dx, dt
 
 # Define external input parameters for sequence_memory
-EXTERNAL_INPUT_PARS1 = [
+EXTERNAL_INPUT_PARS_SM = [
     (0.0, 3.0, 1.5, 10, 15),  # Input 1 parameters: center, amplitude, width, active_start, active_end
     (30.0, 3.0, 1.5, 30, 35),  # Input 2 parameters
     (-40.0, 3.0, 1.5, 50, 55),
@@ -26,7 +26,7 @@ def create_sequence_memory():
     return Field(
         KERNEL_SM,
         FIELD_PARS,
-        EXTERNAL_INPUT_PARS1,
+        EXTERNAL_INPUT_PARS_SM,
         tau_h=20,
         name="Sequence Memory",
         field_type="sequence_memory",
@@ -60,9 +60,13 @@ def create_recall_fields():
 
 
 def run_learning_mode(plot_options):
+
+    # Extract input centers and plot the evolution of fields' activities
+    input_centers = [param[0] for param in EXTERNAL_INPUT_PARS_SM]
+
     """Execute the learning mode."""
     sequence_memory = create_sequence_memory()
-    simultaneous_integration([sequence_memory])
+    simultaneous_integration([sequence_memory], input_centers)
 
     # Initialize plotter
     plotter = Plotter([sequence_memory])
@@ -75,10 +79,10 @@ def run_learning_mode(plot_options):
     save_final_state(sequence_memory.history_u[-1, :], sequence_memory.name)
 
     # Save the parameters of external inputs
-    save_external_input_params(EXTERNAL_INPUT_PARS1)
+    save_external_input_params(EXTERNAL_INPUT_PARS_SM)
 
     # Extract input centers and plot the evolution of fields' activities
-    input_centers = [param[0] for param in EXTERNAL_INPUT_PARS1]
+    input_centers = [param[0] for param in EXTERNAL_INPUT_PARS_SM]
 
     # Plot activity at input centers if specified
     if plot_options.get("plot_activity_at_input_centers", False):
@@ -89,7 +93,7 @@ def run_learning_mode(plot_options):
         plotter.animate_activity(FIELD_PARS, interval=10)
 
 
-def run_recall_mode(plot_options):
+def run_recall_mode(plot_options, input_centers):
     """Execute the recall mode."""
     action_onset, working_memory = create_recall_fields()
 
@@ -97,7 +101,7 @@ def run_recall_mode(plot_options):
     working_memory.add_connection(action_onset, weight=1.0, connection_params={'threshold': 1})
     action_onset.add_connection(working_memory, weight=-5.0, connection_params={'threshold': 0.5})
 
-    simultaneous_integration([action_onset, working_memory])
+    simultaneous_integration([action_onset, working_memory], input_centers)
 
     # Initialize plotter
     plotter = Plotter([action_onset, working_memory])
@@ -107,8 +111,8 @@ def run_recall_mode(plot_options):
         plotter.plot_final_states()
 
     # Load external input parameters and extract input centers
-    external_input_params = load_external_input_params()
-    input_centers = [param[0] for param in external_input_params]
+    # external_input_params = load_external_input_params()
+    # input_centers = [param[0] for param in external_input_params]
 
     # Plot activity at input centers if specified
     if plot_options.get("plot_activity_at_input_centers", False):
